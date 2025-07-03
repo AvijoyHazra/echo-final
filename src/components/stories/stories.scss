@@ -22,6 +22,7 @@
     border-radius: 10px;
     overflow: hidden;
     position: relative;
+    background-color: #f0f2f5;
 
     @include mobile {
       flex: none;
@@ -30,7 +31,7 @@
       border-radius: 50%;
     }
 
-    img {
+    img { // Default styles for story images (not add-story-box)
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -46,6 +47,7 @@
       }
     }
 
+    // Default button styles (not for the add story label button)
     button {
       position: absolute;
       bottom: 40px;
@@ -68,6 +70,61 @@
         top: 0;
         bottom: 0;
         margin: auto;
+      }
+    }
+
+    // Styles for the "Add Story" box
+    &.add-story-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end; // Pushes content to the bottom
+      align-items: center;
+      background-color: #e9e9e9;
+      border: 1px dashed #ccc;
+      padding-bottom: 20px; // Padding from the bottom of the box
+      padding-top: 20px; // Optional: Add padding top if you want to control overall vertical space
+      
+      // Removed img specific styles for add-story-box as we no longer show an image there
+
+      span { // Username
+        position: relative; // Keep relative for flexbox to control
+        bottom: auto;
+        left: auto;
+        color: #333;
+        margin-bottom: 10px; // Space between username and button/label
+      }
+
+      .add-story-label-button { // Styling the label to look like the button
+        position: relative; // Keep relative for flexbox to control
+        bottom: auto;
+        left: auto;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #5271ff;
+        color: white;
+        font-size: 30px;
+        display: flex; // Use flexbox to center the '+' text
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none; // Prevent text selection on the '+'
+        // No margin-top here as flex-end is controlling vertical position
+      }
+
+      @include mobile {
+        background-color: transparent;
+        border: none;
+        
+        span {
+          display: none; // Hide name on mobile as per your existing mobile styles
+        }
+        .add-story-label-button { // Adjust label button on mobile
+          position: relative;
+          margin: 0; // Remove any margins
+          top: auto;
+          bottom: auto;
+        }
       }
     }
   }

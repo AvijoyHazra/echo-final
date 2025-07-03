@@ -2,13 +2,12 @@ import { useContext, useState } from "react";
 import "./stories.scss";
 import { AuthContext } from "../../context/authContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { makeRequest } from "../../axios"; // Assuming makeRequest is now the axios instance
+import { makeRequest } from "../../axios";
 
 const Stories = () => {
   const [file, setFile] = useState(null); // State for the selected story image file
   const { currentUser } = useContext(AuthContext);
 
-  // --- START Change for useQuery v5 ---
   const { isLoading, error, data } = useQuery({
     queryKey: ["stories"],
     queryFn: () =>
@@ -16,7 +15,6 @@ const Stories = () => {
         return res.data;
       }),
   });
-  // --- END Change for useQuery v5 ---
 
   const queryClient = useQueryClient();
 
@@ -24,13 +22,12 @@ const Stories = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      // This endpoint needs to be implemented in your Spring Boot backend for file uploads.
       const res = await makeRequest.post("/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      return res.data; // Assuming res.data is the URL/filename of the uploaded image
+      return res.data;
     } catch (err) {
       console.error(
         "Error uploading story image:",
@@ -40,62 +37,65 @@ const Stories = () => {
     }
   };
 
-  // --- START Change for useMutation v5 ---
   const addStoryMutation = useMutation({
     mutationFn: (newStory) => {
       return makeRequest.post("/stories", newStory);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
-      setFile(null); // Clear the selected file after successful upload
+      setFile(null);
     },
     onError: (err) => {
       console.error("Error creating story:", err.response?.data || err.message);
     },
   });
-  // --- END Change for useMutation v5 ---
-
-  const handleAddStory = async (e) => {
-    e.preventDefault();
-    if (file) {
-      try {
-        const imgUrl = await upload();
-        addStoryMutation.mutate({ img: imgUrl }); // Match Spring Boot's AddStoryRequest DTO
-      } catch (uploadError) {
-        // Error already logged in upload function
-      }
-    } else {
-      alert("Please select an image for your story.");
-    }
-  };
 
   return (
     <div className="stories">
-      <div className="story">
-        {/* Access profilePic from currentUser.user */}
-        <img
-          src={
-            currentUser.user?.profilePic
-              ? currentUser.user.profilePic
-              : "default-profile-pic.jpg"
-          }
-          alt=""
-        />
-        {/* Access name from currentUser.user */}
+      {/* This is the "Add Story" box */}
+      <div className="story add-story-box">
+        {/* We are removing the img tag from here completely */}
+        {/* {file ? (
+          <img src={URL.createObjectURL(file)} alt="Selected Story Preview" />
+        ) : (
+          <img
+            src={
+              currentUser.user?.profilePic
+                ? currentUser.user.profilePic
+                : "https://images.pexels.com/photos/3228727/pexels-photo-3228727.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            }
+            alt="Current User Profile"
+          />
+        )} */}
+        
+        {/* Username */}
         <span>{currentUser.user?.name}</span>
-        {/* File input for adding a story */}
+
+        {/* Hidden file input */}
         <input
           type="file"
           id="storyFile"
-          style={{ display: "none" }}
-          onChange={(e) => setFile(e.target.files[0])}
+          style={{ display: "none" }} // Keep hidden
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setFile(e.target.files[0]);
+            }
+          }}
         />
-        <label htmlFor="storyFile">
-          <button>+</button>
+        
+        {/* The label itself will be styled as the button */}
+        <label htmlFor="storyFile" className="add-story-label-button">
+          + {/* The plus sign directly inside the label */}
         </label>
-        {file && <button onClick={handleAddStory}>Add Story</button>}{" "}
-        {/* Button to trigger upload */}
+
+        {/* If you want a separate "Post Story" button after selection */}
+        {/* {file && (
+          <button className="post-story-button" onClick={() => addStoryMutation.mutate({ img: URL.createObjectURL(file) })}>
+            Post Story
+          </button>
+        )} */}
       </div>
+
       {error
         ? `Something went wrong! Error: ${
             error.response?.data || error.message
@@ -105,13 +105,11 @@ const Stories = () => {
         : data && data.length > 0
         ? data.map((story) => (
             <div className="story" key={story.id}>
-              {/* Ensure story.img path is correct */}
               <img
                 src={story.img ? story.img : "default-story.jpg"}
                 alt=""
               />
-              <span>{story.name}</span>{" "}
-              {/* Assuming story object includes 'name' of the user */}
+              <span>{story.name}</span>
             </div>
           ))
         : "No stories found."}
