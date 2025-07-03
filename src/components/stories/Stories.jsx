@@ -76,7 +76,7 @@ const Stories = () => {
         <img
           src={
             currentUser.user?.profilePic
-              ? "/upload/" + currentUser.user.profilePic
+              ? currentUser.user.profilePic
               : "default-profile-pic.jpg"
           }
           alt=""
@@ -107,7 +107,7 @@ const Stories = () => {
             <div className="story" key={story.id}>
               {/* Ensure story.img path is correct */}
               <img
-                src={story.img ? "/upload/" + story.img : "default-story.jpg"}
+                src={story.img ? story.img : "default-story.jpg"}
                 alt=""
               />
               <span>{story.name}</span>{" "}
